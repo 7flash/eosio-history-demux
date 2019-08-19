@@ -1,46 +1,16 @@
-[![Build Status](https://travis-ci.org/7flash/node-module-boilerplate.svg?branch=master)](https://travis-ci.org/7flash/node-module-boilerplate)
-[![Coverage Status](https://coveralls.io/repos/github/7flash/node-module-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/7flash/node-module-boilerplate?branch=master)
-![npm (scoped)](https://img.shields.io/npm/v/sevenflash/node-module-boilerplate)
+[![Build Status](https://travis-ci.org/7flash/eosio-history-demux.svg?branch=master)](https://travis-ci.org/7flash/eosio-history-demux)
+[![Coverage Status](https://coveralls.io/repos/github/7flash/eosio-history-demux/badge.svg?branch=master)](https://coveralls.io/github/7flash/eosio-history-demux?branch=master)
+![npm (scoped)](https://img.shields.io/npm/v/eosio-history-demux)
 
-# node-module-boilerplate
+# eosio-history-demux
 
-> My awesome module
+> Demux is a backend infrastructure pattern for sourcing blockchain events to deterministically update queryable datastores and trigger side effects.
+(https://github.com/EOSIO/demux-js)
 
+This library provides efficient implementation of demux pattern using History API.
 
 ## Install
 
 ```
-$ npm install sevenflash/node-module-boilerplate
+$ npm install eosio-history-demux
 ```
-
-
-## Usage
-
-```js
-const example = require('sevenflash/node-module-boilerplate')
-
-example('diadem')
-//=> 'diadem is awesome'
-```
-
-
-## API
-
-### example(input, options?)
-
-#### input
-
-Type: `string`
-
-Lorem ipsum.
-
-#### options
-
-Type: `object`
-
-##### postfix
-
-Type: `string`<br>
-Default: `awesome`
-
-Lorem ipsum.
