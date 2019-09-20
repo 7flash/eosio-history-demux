@@ -1,6 +1,6 @@
 {
 	"name": "eosio-history-demux",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "EOSIO History Demux",
 	"license": "MIT",
 	"repository": "https://github.com/7flash/eosio-history-demux",
