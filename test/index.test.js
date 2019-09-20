@@ -1,9 +1,13 @@
 const { describe, Try } = require('riteway')
-const { createClient, createReader, createWriter, processActions } = require('../lib')
+const { createClient, createReducer } = require('../lib')
 
 const called = {
   actionone: false,
-  actiontwo: false
+  actiontwo: false,
+  actionthree: false,
+  actionfour: false,
+  actionfive: false,
+  newaction: false
 }
 const handler = name => () => called[name] = true
 
@@ -14,77 +18,84 @@ const action = (name, data = {}) => ({
   }
 })
 
-const mockClient = {
-  rpc: {
-    history_get_actions: () => {
-      return {
-        actions: [
-          action('actionone'),
-          action('actiontwo')
-        ]
+const createMockClient = (actions, offset = 1) => {
+  let historyActions = actions
+
+  return {
+    rpc: {
+      history_get_actions: (contract, pos, offset) => {
+        return {
+          actions: historyActions.slice(pos, offset)
+        }
       }
-    }
+    },
+    pushAction: (action) => historyActions.push(action)
   }
 }
 
-describe('Module', async assert => {
-  const client = createClient({
-    httpEndpoint: 'httpEndpoint'
-  })
+describe.only('Idle', async assert => {
+  const mockClient = createMockClient([])
 
-  const reader = createReader({
+  const reducer = createReducer({
     client: mockClient,
-    contract: 'contractname'
-  })
-
-  const writer = createWriter({
+    contract: 'demo',
     handlers: {
-      'actionone': handler('actionone'),
-      'actiontwo': handler('actiontwo')
+      'newaction': handler('newaction')
     }
-  })
-
-  assert({
-    given: 'connect blockchain',
-    should: 'create client instance',
-    actual: typeof client,
-    expected: 'object'
-  })
-
-  assert({
-    given: 'connect contract',
-    should: 'create actions stream',
-    actual: typeof reader,
-    expected: 'object'
-  })
-
-  assert({
-    given: 'connect handlers',
-    should: 'create processor stream',
-    actual: typeof writer,
-    expected: 'object'
-  })
-
-  processActions({
-    reader, writer,
-    fromBlock: 1
   })
 
   setImmediate(() => {
     assert({
-      given: 'process first action',
-      should: 'should execute handler',
-      actual: called['actionone'],
-      expected: true
+      given: 'empty response',
+      should: 'should wait until new actions',
+      actual: called['newaction'],
+      expected: false
     })
 
-    setImmediate(() => {
+    mockClient.pushAction(action('newaction'))
+
+    setTimeout(() => {
       assert({
-        given: 'process first action',
-        should: 'should execute handler',
-        actual: called['actiontwo'],
+        given: 'new action in history',
+        should: 'handle new action',
+        actual: called['newaction'],
         expected: true
       })
+
+      reducer.stop()
+    }, 1000)
+  })
+})
+describe('Backpressure', async assert => {
+  const mockClient = createMockClient([
+    action('actionone'),
+    action('actiontwo'),
+    action('actionthree'),
+    action('actionfour'),
+    action('actionfive')
+  ], 3)
+
+  const reducer = createReducer({
+    client: mockClient,
+    contract: 'demo',
+    handlers: {
+      'actionone': handler('actionone'),
+      'actiontwo': handler('actiontwo'),
+      'actionthree': handler('actionthree'),
+      'actionfour': handler('actionfour'),
+      'actionfive': handler('actionfive')
+    },
+    highWaterMark: 2
+  })
+
+  setImmediate(() => {
+    assert({
+      given: 'multiple actions in response',
+      should: 'process all actions sequentially and send another request when buffer is empty',
+      actual: Object.keys(called).filter(fn => called[fn] === true).length,
+      expected: 5
     })
+
+    reducer.stop()
   })
 })
