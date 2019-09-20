@@ -14,3 +14,25 @@ This library provides efficient implementation of demux pattern using History AP
 ```
 $ npm install eosio-history-demux
 ```
+
+## Example
+
+```
+const { createClient, createReducer } = require('eosio-history-demux')
+
+const httpEndpoint = 'https://api.eos.miami'
+
+const client = createClient(httpEndpoint)
+
+const reducer = createReducer({
+    client,
+    contractName: 'eosio.msig',
+    fromAction: 0 // number of action in history (optional)
+    batchSize: 64 // number of actions per request (optional)
+    handlers: {
+      // actions are processed sequentially, therefore handlers can depend on data indexed by previous handler
+      'propose': async (transaction) => console.log(`new proposal at action #${transaction.account_action_seq}`)
+      'approve': async (transaction) => console.log(`new approval at action #${transaction.account_action_seq}`)
+    }
+})
+```
